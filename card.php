@@ -19,17 +19,32 @@ PayU::$apiLogin = "11959c415b33d0c";
 PayU::$language = SupportedLanguages::ES;
 PayU::$isTest = true;
 
+$startTime = date('Y-m-d H:i:s');
+
 Environment::setPaymentsCustomUrl("https://stg.api.payulatam.com/payments-api/4.0/service.cgi");
 // Queries URL
 Environment::setReportsCustomUrl("https://stg.api.payulatam.com/reports-api/4.0/service.cgi");
 // Subscriptions for recurring payments URL
 Environment::setSubscriptionsCustomUrl("https://stg.api.payulatam.com/payments-api/rest/v4.3/");
 
+//---------------get order by order_test.php--------------------------
+$filename = 'createOrderId.php';
+$handle = fopen($filename, "r");
+$order_id = fread($handle, filesize ($filename));
+fclose($handle);
+
+$netOrder = $order_id + 1;
+file_put_contents($filename, $netOrder);	//orderid = orderid + 1 in order_test.php
+//---------------get order by order_test.php--------------------------
+
+
+$reference = "comprame_test_".$order_id;
+
 $parameters = array(
 		PayUParameters::ACCOUNT_ID => "500538",
 		
-		PayUParameters::REFERENCE_CODE => "comprame_test_10000027",
-		PayUParameters::DESCRIPTION => "Comprame Test",
+		PayUParameters::REFERENCE_CODE => $reference,
+		PayUParameters::DESCRIPTION => $reference,
 		
 		PayUParameters::VALUE => "10000",
 		PayUParameters::CURRENCY => "COP",
@@ -99,6 +114,14 @@ if ($response) {
 		echo "responseMessage:".$response->transactionResponse->responseMessage ."<br>";
 	}
 	var_dump($response->transactionResponse);
+	
+	$endTime = date("Y-m-d H:i:s");
+	$content = 'startTime:'.$startTime.'-----endTime:'.$endTime.PHP_EOL;
+	$content .= json_encode($response).PHP_EOL;
+	
+	$handle = fopen('logs/card.log', "a+");
+	$str = fwrite($handle, $content);
+	fclose($handle);
 }
 
 

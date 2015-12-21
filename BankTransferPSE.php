@@ -8,13 +8,25 @@ PayU::$apiLogin = "11959c415b33d0c";
 PayU::$language = SupportedLanguages::ES;
 PayU::$isTest = false;
 
+$startTime = date('Y-m-d H:i:s');
+
 Environment::setPaymentsCustomUrl("https://stg.api.payulatam.com/payments-api/4.0/service.cgi");
 // Queries URL
 Environment::setReportsCustomUrl("https://stg.api.payulatam.com/reports-api/4.0/service.cgi");
 // Subscriptions for recurring payments URL
 Environment::setSubscriptionsCustomUrl("https://stg.api.payulatam.com/payments-api/rest/v4.3/");
 
-$reference = "comprame_test_10000169";
+//---------------get order by order_test.php--------------------------
+$filename = 'createOrderId.php';
+$handle = fopen($filename, "r");
+$order_id = fread($handle, filesize ($filename));
+fclose($handle);
+
+$netOrder = $order_id + 1;
+file_put_contents($filename, $netOrder);	//orderid = orderid + 1 in order_test.php
+//---------------get order by order_test.php--------------------------
+
+$reference = "comprame_test_".$order_id;
 $value = "10000";
 
 $parameters = array(
@@ -23,7 +35,7 @@ $parameters = array(
 	//Enter here the reference code.
 	PayUParameters::REFERENCE_CODE => $reference,
 	//Enter description here.
-	PayUParameters::DESCRIPTION => "payment test",
+	PayUParameters::DESCRIPTION => $reference,
 	
 	// -- Values --
 	//Enter the value here.     
@@ -54,7 +66,7 @@ $parameters = array(
 	//"Banco Tequendama","pseCode":"1035"		"Banco Union Colombiano","pseCode":"1022"	"Banco Web Service ACH","pseCode":"1055"	"Banco Web Service ACH WSE 3.0","pseCode":"3155"
 	//"Banco de Prueba Proyecto Antifraude","pseCode":"1010"	"Citibank Colombia S.A.","pseCode":"1009"	"HELM BANK S.A. WSE 3.0","pseCode":"1014"	"HELM BANK S.A...","pseCode":"1098"
 	//"Proyecto antifraude- entidad financiera ","pseCode":"1011"
-	PayUParameters::PSE_FINANCIAL_INSTITUTION_CODE => "1022",
+	PayUParameters::PSE_FINANCIAL_INSTITUTION_CODE => "1040",
 	//person type
 	PayUParameters::PAYER_PERSON_TYPE => "N",
 	//idcard
@@ -76,7 +88,7 @@ $parameters = array(
 	PayUParameters::USER_AGENT=>"Mozilla/5.0 (Windows NT 5.1; rv:18.0) Gecko/20100101 Firefox/18.0",
 	
 	//response's url
-	PayUParameters::RESPONSE_URL=>"http://www.test.com/response"
+	PayUParameters::RESPONSE_URL=>"http://test.com/response"
 	
 );
 	
@@ -101,4 +113,12 @@ if($response){
 		echo "responseMessage:".$response->transactionResponse->responseMessage ."<br>";
 	}
 	var_dump($response);
+	
+	$endTime = date("Y-m-d H:i:s");
+	$content = 'startTime:'.$startTime.'-----endTime:'.$endTime.PHP_EOL;
+	$content .= json_encode($response).PHP_EOL;
+	
+	$handle = fopen('logs/bankTransferPSE.log', "a+");
+	$str = fwrite($handle, $content);
+	fclose($handle);
 }
