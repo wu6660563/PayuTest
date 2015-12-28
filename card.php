@@ -113,7 +113,7 @@ if ($response) {
 	if(isset($response->transactionResponse->responseMessage)) {
 		echo "responseMessage:".$response->transactionResponse->responseMessage ."<br>";
 	}
-	var_dump($response->transactionResponse);
+	var_dump($response);
 	
 	$endTime = date("Y-m-d H:i:s");
 	$content = 'startTime:'.$startTime.'-----endTime:'.$endTime.PHP_EOL;
